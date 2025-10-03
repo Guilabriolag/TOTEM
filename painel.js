@@ -1,17 +1,6 @@
-/************************************************************
- * Painel Administrativo - SeuNegócio
- * Funcionalidades:
- * - CRUD Categorias, Produtos, Clientes, Cupons
- * - Publicidade, Dados da Loja, Cobertura, Customização
- * - Dashboard com estatísticas
- * - Preview em tempo real (versão simplificada do totem)
- * - Salvar LocalStorage / Publicar JSONBin
- * - Restaurar padrão com senha (1234)
- ************************************************************/
-
-// ========================
+// =============================
 // Estado Inicial
-// ========================
+// =============================
 let state = {
   loja: {
     nome: "",
@@ -41,25 +30,26 @@ let state = {
   cobertura: []
 };
 
-// ========================
-// Utilitários LocalStorage
-// ========================
+// =============================
+// Utilitários de Armazenamento
+// =============================
 function salvarLocal() {
-  localStorage.setItem("painelState", JSON.stringify(state));
-  alert("💾 Configurações salvas no dispositivo!");
+  localStorage.setItem('painelState', JSON.stringify(state));
+  alert("💾 Salvo no dispositivo!");
 }
+
 function carregarLocal() {
-  const saved = localStorage.getItem("painelState");
+  const saved = localStorage.getItem('painelState');
   if (saved) {
     state = JSON.parse(saved);
-    console.log("🔄 Estado carregado:", state);
-    atualizarPreview();
+    renderTudo();
+    alert("✅ Configurações carregadas!");
   }
 }
 
-// ========================
+// =============================
 // Publicar no JSONBin
-// ========================
+// =============================
 function publicarTotem() {
   const binId = document.getElementById("jsonbinId").value.trim();
   const masterKey = document.getElementById("masterKey").value.trim();
@@ -77,22 +67,17 @@ function publicarTotem() {
     },
     body: JSON.stringify(state)
   })
-  .then(res => {
-    if (!res.ok) throw new Error("Erro ao publicar no JSONBin");
-    return res.json();
-  })
-  .then(() => {
-    alert("✅ Publicado com sucesso no Totem!");
-  })
+  .then(res => res.json())
+  .then(() => alert("✅ Publicado com sucesso no Totem!"))
   .catch(err => {
     console.error("Erro:", err);
-    alert("❌ Falha ao publicar no Totem. Verifique suas credenciais.");
+    alert("❌ Erro ao publicar no JSONBin.");
   });
 }
 
-// ========================
+// =============================
 // Restaurar Padrão
-// ========================
+// =============================
 function restaurarPadrao() {
   const senha = prompt("Digite a senha para restaurar (1234):");
   if (senha !== "1234") {
@@ -106,35 +91,17 @@ function restaurarPadrao() {
     produtos: [],
     clientes: [],
     cupons: [],
-    publicidade: { banner:{texto:"", imagem:"", link:""}, carrossel:[], redesSociais:{instagram:"",facebook:"",whatsapp:""} },
+    publicidade: { banner:{texto:"",imagem:"",link:""}, carrossel:[], redesSociais:{instagram:"",facebook:"",whatsapp:""} },
     cobertura: []
   };
   salvarLocal();
-  atualizarPreview();
-  alert("🔄 Sistema restaurado para padrão!");
+  renderTudo();
+  alert("🔄 Restaurado para padrão!");
 }
 
-// ========================
-// Navegação entre abas
-// ========================
-const tabs = document.querySelectorAll('.tab');
-const menuItems = document.querySelectorAll('#menu li');
-menuItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const target = item.dataset.tab;
-    tabs.forEach(tab => tab.classList.remove('active'));
-    document.getElementById(target).classList.add('active');
-  });
-});
-
-// Toggle menu lateral
-document.getElementById("toggleMenu").addEventListener("click", ()=>{
-  document.getElementById("sidebar").classList.toggle("collapsed");
-});
-
-// ========================
+// =============================
 // Dashboard
-// ========================
+// =============================
 function renderDashboard() {
   const ctx = document.getElementById("vendasChart").getContext("2d");
   new Chart(ctx, {
@@ -143,33 +110,30 @@ function renderDashboard() {
       labels: ["Produtos", "Clientes", "Cupons", "Bairros"],
       datasets: [{
         label: "Estatísticas",
-        data: [
-          state.produtos.length,
-          state.clientes.length,
-          state.cupons.length,
-          state.cobertura.length
-        ],
+        data: [state.produtos.length, state.clientes.length, state.cupons.length, state.cobertura.length],
         backgroundColor: ["#3498db","#2ecc71","#e74c3c","#f39c12"]
       }]
     }
   });
 }
 
-// ========================
+// =============================
 // Categorias
-// ========================
+// =============================
 function adicionarCategoria() {
-  const nome = document.getElementById("novaCategoria").value.trim();
-  if(!nome) return alert("Digite um nome de categoria!");
+  const nome = document.getElementById("novaCategoria").value;
+  if (!nome) return;
   state.categorias.push({ nome, subcategorias: [] });
   salvarLocal();
   renderCategorias();
 }
+
 function removerCategoria(i) {
   state.categorias.splice(i,1);
   salvarLocal();
   renderCategorias();
 }
+
 function renderCategorias() {
   const container = document.getElementById("category-tree");
   container.innerHTML = state.categorias.map((c,i)=>`
@@ -180,9 +144,9 @@ function renderCategorias() {
   `).join("");
 }
 
-// ========================
-// Modos de Venda
-// ========================
+// =============================
+// Modo de Venda
+// =============================
 function adicionarModoVenda() {
   const tipo = document.getElementById("selectModoVenda").value;
   const exemplo = document.getElementById("inputModoVendaExemplo").value;
@@ -190,16 +154,15 @@ function adicionarModoVenda() {
   salvarLocal();
   renderModosVenda();
 }
+
 function renderModosVenda() {
-  const container = document.getElementById("modo-venda");
-  container.innerHTML += state.modosVenda.map(m=>`
-    <div>${m.tipo} (${m.exemplo})</div>
-  `).join("");
+  const div = document.getElementById("modo-venda");
+  div.innerHTML += state.modosVenda.map(m=>`<div>${m.tipo} (${m.exemplo})</div>`).join("");
 }
 
-// ========================
+// =============================
 // Produtos
-// ========================
+// =============================
 function adicionarProduto() {
   const produto = {
     nome: document.getElementById("prodNome").value,
@@ -217,11 +180,13 @@ function adicionarProduto() {
   salvarLocal();
   renderProdutos();
 }
+
 function removerProduto(i) {
   state.produtos.splice(i,1);
   salvarLocal();
   renderProdutos();
 }
+
 function renderProdutos() {
   const lista = document.getElementById("listaProdutosContainer");
   lista.innerHTML = state.produtos.map((p,i)=>`
@@ -234,45 +199,109 @@ function renderProdutos() {
   `).join("");
 }
 
-// ========================
-// Preview simplificado do Totem
-// ========================
-function atualizarPreview(){
+// =============================
+// Clientes
+// =============================
+function salvarCliente(cliente) {
+  state.clientes.push(cliente);
+  salvarLocal();
+}
+
+// =============================
+// Cupons
+// =============================
+function criarCupom(cupom) {
+  state.cupons.push(cupom);
+  salvarLocal();
+}
+
+// =============================
+// Publicidade
+// =============================
+function salvarPublicidade(pub) {
+  state.publicidade = pub;
+  salvarLocal();
+}
+
+// =============================
+// Dados da Loja
+// =============================
+function salvarDadosLoja(dados) {
+  state.loja = { ...state.loja, ...dados };
+  salvarLocal();
+}
+
+// =============================
+// Cobertura
+// =============================
+function adicionarCobertura(bairro, taxa, tempo) {
+  state.cobertura.push({ bairro, taxa, tempo });
+  salvarLocal();
+}
+
+// =============================
+// Customizar
+// =============================
+function salvarCustomizacao(config) {
+  state.loja = { ...state.loja, ...config };
+  salvarLocal();
+}
+
+// =============================
+// Preview
+// =============================
+function atualizarPreview() {
   const iframe = document.getElementById("previewIframe");
-  if(!iframe) return;
   iframe.srcdoc = gerarTotemHTML();
 }
-function gerarTotemHTML(){
+
+function gerarTotemHTML() {
   return `
     <html>
-      <head>
-        <style>
-          body { font-family: Arial; }
-          header { background:${state.loja.corPrimaria}; color:#fff; padding:10px; text-align:center; }
-          .produto { border:1px solid #ccc; margin:5px; padding:5px; border-radius:5px; }
-        </style>
-      </head>
-      <body>
-        <header>
+      <head><title>${state.loja.nome}</title></head>
+      <body style="font-family:Arial,sans-serif;">
+        <header style="background:${state.loja.corPrimaria};color:#fff;padding:10px;text-align:center;">
           <img src="${state.loja.logo}" style="height:40px;">
           <h1>${state.loja.nome}</h1>
         </header>
-        <h2>Produtos:</h2>
-        <div>
-          ${state.produtos.map(p=>`<div class="produto">${p.nome} - R$ ${p.preco.toFixed(2)}</div>`).join("")}
-        </div>
+        <main>
+          <h2>Produtos:</h2>
+          <ul>
+            ${state.produtos.map(p=>`<li>${p.nome} - R$ ${p.preco}</li>`).join('')}
+          </ul>
+        </main>
       </body>
     </html>
   `;
 }
 
-// ========================
+// =============================
+// Navegação entre Abas
+// =============================
+const tabs = document.querySelectorAll('.tab');
+const menuItems = document.querySelectorAll('#menu li');
+
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.tab;
+    tabs.forEach(tab => tab.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+    if (target === "dashboard") renderDashboard();
+    if (target === "preview") atualizarPreview();
+  });
+});
+
+// =============================
 // Inicialização
-// ========================
+// =============================
 window.onload = () => {
   carregarLocal();
-  renderDashboard();
+  renderTudo();
+};
+
+// Renderizar tudo ao carregar
+function renderTudo() {
   renderCategorias();
   renderProdutos();
-  renderModosVenda();
-};
+  renderDashboard();
+}
