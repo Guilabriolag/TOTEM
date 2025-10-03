@@ -1,6 +1,17 @@
-// =========================
-// Estado inicial
-// =========================
+/************************************************************
+ * Painel Administrativo - SeuNegócio
+ * Funcionalidades:
+ * - CRUD Categorias, Produtos, Clientes, Cupons
+ * - Publicidade, Dados da Loja, Cobertura, Customização
+ * - Dashboard com estatísticas
+ * - Preview em tempo real (versão simplificada do totem)
+ * - Salvar LocalStorage / Publicar JSONBin
+ * - Restaurar padrão com senha (1234)
+ ************************************************************/
+
+// ========================
+// Estado Inicial
+// ========================
 let state = {
   loja: {
     nome: "",
@@ -30,12 +41,84 @@ let state = {
   cobertura: []
 };
 
-// =========================
-// Abas (tabs) e menu
-// =========================
+// ========================
+// Utilitários LocalStorage
+// ========================
+function salvarLocal() {
+  localStorage.setItem("painelState", JSON.stringify(state));
+  alert("💾 Configurações salvas no dispositivo!");
+}
+function carregarLocal() {
+  const saved = localStorage.getItem("painelState");
+  if (saved) {
+    state = JSON.parse(saved);
+    console.log("🔄 Estado carregado:", state);
+    atualizarPreview();
+  }
+}
+
+// ========================
+// Publicar no JSONBin
+// ========================
+function publicarTotem() {
+  const binId = document.getElementById("jsonbinId").value.trim();
+  const masterKey = document.getElementById("masterKey").value.trim();
+
+  if (!binId || !masterKey) {
+    alert("⚠️ Configure o JSONBin ID e a Master Key antes de publicar!");
+    return;
+  }
+
+  fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Master-Key": masterKey
+    },
+    body: JSON.stringify(state)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Erro ao publicar no JSONBin");
+    return res.json();
+  })
+  .then(() => {
+    alert("✅ Publicado com sucesso no Totem!");
+  })
+  .catch(err => {
+    console.error("Erro:", err);
+    alert("❌ Falha ao publicar no Totem. Verifique suas credenciais.");
+  });
+}
+
+// ========================
+// Restaurar Padrão
+// ========================
+function restaurarPadrao() {
+  const senha = prompt("Digite a senha para restaurar (1234):");
+  if (senha !== "1234") {
+    alert("❌ Senha incorreta!");
+    return;
+  }
+  state = {
+    loja: { nome:"", telefone:"", pix:"", banco:"", endereco:"", logo:"", horarios:"", corPrimaria:"#3498db", corSecundaria:"#95a5a6", fundo:"", botaoCarrinho:"", modoEscuro:false, musicaAmbiente:"" },
+    categorias: [],
+    modosVenda: [],
+    produtos: [],
+    clientes: [],
+    cupons: [],
+    publicidade: { banner:{texto:"", imagem:"", link:""}, carrossel:[], redesSociais:{instagram:"",facebook:"",whatsapp:""} },
+    cobertura: []
+  };
+  salvarLocal();
+  atualizarPreview();
+  alert("🔄 Sistema restaurado para padrão!");
+}
+
+// ========================
+// Navegação entre abas
+// ========================
 const tabs = document.querySelectorAll('.tab');
 const menuItems = document.querySelectorAll('#menu li');
-
 menuItems.forEach(item => {
   item.addEventListener('click', () => {
     const target = item.dataset.tab;
@@ -45,39 +128,19 @@ menuItems.forEach(item => {
 });
 
 // Toggle menu lateral
-const sidebar = document.getElementById('sidebar');
-document.getElementById('toggleMenu').addEventListener('click', () => {
-  sidebar.classList.toggle('collapsed');
+document.getElementById("toggleMenu").addEventListener("click", ()=>{
+  document.getElementById("sidebar").classList.toggle("collapsed");
 });
 
-// =========================
-// Funções LocalStorage
-// =========================
-function salvarLocal() {
-  localStorage.setItem('painelState', JSON.stringify(state));
-  alert("💾 Salvo no dispositivo!");
-}
-function carregarLocal() {
-  const saved = localStorage.getItem('painelState');
-  if (saved) {
-    state = JSON.parse(saved);
-    alert("🔄 Configurações carregadas!");
-    atualizarPreview();
-    renderDashboard();
-    renderCategorias();
-    renderProdutos();
-  }
-}
-
-// =========================
+// ========================
 // Dashboard
-// =========================
+// ========================
 function renderDashboard() {
   const ctx = document.getElementById("vendasChart").getContext("2d");
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ["Produtos", "Clientes", "Cupons", "Cobertura"],
+      labels: ["Produtos", "Clientes", "Cupons", "Bairros"],
       datasets: [{
         label: "Estatísticas",
         data: [
@@ -92,14 +155,13 @@ function renderDashboard() {
   });
 }
 
-// =========================
+// ========================
 // Categorias
-// =========================
+// ========================
 function adicionarCategoria() {
-  const nome = document.getElementById("novaCategoria").value;
-  if (!nome) return;
+  const nome = document.getElementById("novaCategoria").value.trim();
+  if(!nome) return alert("Digite um nome de categoria!");
   state.categorias.push({ nome, subcategorias: [] });
-  document.getElementById("novaCategoria").value = "";
   salvarLocal();
   renderCategorias();
 }
@@ -118,20 +180,26 @@ function renderCategorias() {
   `).join("");
 }
 
-// =========================
-// Modo de Venda
-// =========================
+// ========================
+// Modos de Venda
+// ========================
 function adicionarModoVenda() {
   const tipo = document.getElementById("selectModoVenda").value;
   const exemplo = document.getElementById("inputModoVendaExemplo").value;
   state.modosVenda.push({ tipo, exemplo });
   salvarLocal();
-  alert("⚖️ Modo de venda adicionado!");
+  renderModosVenda();
+}
+function renderModosVenda() {
+  const container = document.getElementById("modo-venda");
+  container.innerHTML += state.modosVenda.map(m=>`
+    <div>${m.tipo} (${m.exemplo})</div>
+  `).join("");
 }
 
-// =========================
+// ========================
 // Produtos
-// =========================
+// ========================
 function adicionarProduto() {
   const produto = {
     nome: document.getElementById("prodNome").value,
@@ -166,134 +234,45 @@ function renderProdutos() {
   `).join("");
 }
 
-// =========================
-// Clientes
-// =========================
-function salvarCliente(cliente) {
-  state.clientes.push(cliente);
-  salvarLocal();
-  alert("👥 Cliente salvo!");
-}
-
-// =========================
-// Cupons
-// =========================
-function criarCupom(cupom) {
-  state.cupons.push(cupom);
-  salvarLocal();
-  alert("🎟️ Cupom criado!");
-}
-
-// =========================
-// Publicidade
-// =========================
-function salvarPublicidade(dados) {
-  state.publicidade = dados;
-  salvarLocal();
-  alert("📢 Publicidade salva!");
-}
-
-// =========================
-// Dados da Loja
-// =========================
-function salvarDadosLoja(dados) {
-  Object.assign(state.loja, dados);
-  salvarLocal();
-  alert("🗝️ Dados da loja atualizados!");
-}
-
-// =========================
-// Cobertura
-// =========================
-function adicionarBairro(bairro, taxa, tempo) {
-  state.cobertura.push({ bairro, taxa, tempo });
-  salvarLocal();
-  alert("🗺️ Bairro adicionado!");
-}
-
-// =========================
-// Customizar
-// =========================
-function customizarLoja(config) {
-  Object.assign(state.loja, config);
-  salvarLocal();
-  alert("🎨 Personalização aplicada!");
-}
-
-// =========================
-// Preview
-// =========================
+// ========================
+// Preview simplificado do Totem
+// ========================
 function atualizarPreview(){
   const iframe = document.getElementById("previewIframe");
+  if(!iframe) return;
   iframe.srcdoc = gerarTotemHTML();
 }
 function gerarTotemHTML(){
   return `
     <html>
-      <head><title>${state.loja.nome}</title></head>
-      <body style="font-family:Arial,sans-serif;">
-        <header style="background:${state.loja.corPrimaria};color:#fff;padding:10px;text-align:center;">
+      <head>
+        <style>
+          body { font-family: Arial; }
+          header { background:${state.loja.corPrimaria}; color:#fff; padding:10px; text-align:center; }
+          .produto { border:1px solid #ccc; margin:5px; padding:5px; border-radius:5px; }
+        </style>
+      </head>
+      <body>
+        <header>
           <img src="${state.loja.logo}" style="height:40px;">
           <h1>${state.loja.nome}</h1>
         </header>
-        <main>
-          <h2>Produtos:</h2>
-          <ul>
-            ${state.produtos.map(p=>`<li>${p.nome} - R$ ${p.preco.toFixed(2)}</li>`).join('')}
-          </ul>
-        </main>
+        <h2>Produtos:</h2>
+        <div>
+          ${state.produtos.map(p=>`<div class="produto">${p.nome} - R$ ${p.preco.toFixed(2)}</div>`).join("")}
+        </div>
       </body>
     </html>
   `;
 }
 
-// =========================
-// Publicar no JSONBin
-// =========================
-function publicarTotem() {
-  const binId = document.getElementById("jsonbinId").value.trim();
-  const masterKey = document.getElementById("masterKey").value.trim();
-  if(!binId || !masterKey) { alert("⚠️ Configure JSONBin ID e Master Key"); return; }
-
-  fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", "X-Master-Key": masterKey },
-    body: JSON.stringify(state)
-  }).then(res => res.json())
-    .then(()=> alert("✅ Publicado com sucesso!"))
-    .catch(()=> alert("❌ Erro ao publicar."));
-}
-
-// =========================
-// Restaurar padrão
-// =========================
-function restaurarPadrao() {
-  const senha = prompt("Senha para restaurar padrão:");
-  if(senha !== "1234"){ alert("❌ Senha incorreta"); return; }
-  state = {
-    loja: {
-      nome:"",telefone:"",pix:"",banco:"",endereco:"",logo:"",horarios:"",
-      corPrimaria:"#3498db",corSecundaria:"#95a5a6",fundo:"",botaoCarrinho:"",
-      modoEscuro:false,musicaAmbiente:""
-    },
-    categorias:[], modosVenda:[], produtos:[], clientes:[], cupons:[],
-    publicidade:{banner:{texto:"",imagem:"",link:""},carrossel:[],redesSociais:{instagram:"",facebook:"",whatsapp:""}},
-    cobertura:[]
-  };
-  salvarLocal();
-  atualizarPreview();
-  alert("🔄 Estado restaurado!");
-}
-
-// =========================
+// ========================
 // Inicialização
-// =========================
+// ========================
 window.onload = () => {
   carregarLocal();
   renderDashboard();
   renderCategorias();
   renderProdutos();
-  atualizarPreview();
-  document.getElementById("btnAdicionarCategoria")?.addEventListener("click", adicionarCategoria);
-  document.getElementById("btnAdicionarProduto")?.addEventListener("click", adicionarProduto);
+  renderModosVenda();
 };
