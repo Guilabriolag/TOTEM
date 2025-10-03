@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - SeuNegócio</title>
+  <link rel="stylesheet" href="painel.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Menu lateral -->
+    <aside id="sidebar" class="collapsed">
+      <h2>SeuNegócio</h2>
+      <button id="toggleMenu">☰</button>
+      <nav id="menu">
+        <ul>
+          <li data-tab="dashboard">📊 Dashboard</li>
+          <li data-tab="categorias">🗂️ Categorias</li>
+          <li data-tab="modo-venda">⚖️ Modo de Venda</li>
+          <li data-tab="produtos">📦 Produtos</li>
+          <li data-tab="clientes">👥 Clientes</li>
+          <li data-tab="cupons">🎟️ Cupons</li>
+          <li data-tab="publicidade">📢 Publicidade</li>
+          <li data-tab="dados-loja">🗝️ Dados da Loja</li>
+          <li data-tab="cobertura">🗺️ Cobertura</li>
+          <li data-tab="customizar">🎨 Customizar</li>
+          <li data-tab="preview">🖥️ Preview</li>
+          <li data-tab="config">⚙️ Configurações</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main>
+      <!-- Dashboard -->
+      <section id="dashboard" class="tab active">
+        <h2>📊 Dashboard</h2>
+        <canvas id="vendasChart"></canvas>
+      </section>
+
+      <!-- Categorias -->
+      <section id="categorias" class="tab">
+        <h2>🗂️ Categorias</h2>
+        <div class="form-group">
+          <input type="text" id="novaCategoria" placeholder="Nova Categoria">
+          <button id="btnAdicionarCategoria" class="btn-primary">Adicionar Categoria</button>
+        </div>
+        <div id="category-tree"></div>
+      </section>
+
+      <!-- Produtos -->
+      <section id="produtos" class="tab">
+        <h2>📦 Produtos</h2>
+        <div class="form-grid">
+          <input id="prodNome" type="text" placeholder="Nome do Produto">
+          <input id="prodPreco" type="number" step="0.01" placeholder="Preço">
+          <input id="prodImagem" type="url" placeholder="URL da Imagem">
+          <textarea id="prodDescricao" placeholder="Descrição"></textarea>
+          <input id="prodCategoria" type="text" placeholder="Categoria">
+          <input id="prodEstoque" type="number" placeholder="Estoque">
+          <label><input id="prodDestaque" type="checkbox"> Destaque</label>
+          <label><input id="prodAtivo" type="checkbox"> Ativo</label>
+        </div>
+        <button id="btnAdicionarProduto" class="btn-primary">Adicionar Produto</button>
+        <div id="listaProdutosContainer"></div>
+      </section>
+
+      <!-- Preview -->
+      <section id="preview" class="tab">
+        <h2>🖥️ Preview em Tempo Real</h2>
+        <iframe id="previewIframe" style="width:100%;height:600px;border:1px solid #ccc;border-radius:8px;"></iframe>
+      </section>
+
+      <!-- Configurações -->
+      <section id="config" class="tab">
+        <h2>⚙️ Configurações JSONBin</h2>
+        <label for="jsonbinId">JSONBin ID:</label>
+        <input type="text" id="jsonbinId" placeholder="Insira seu JSONBin ID">
+        <label for="masterKey">Master Key:</label>
+        <input type="password" id="masterKey" placeholder="Insira sua Master Key">
+        <button class="btn-primary" onclick="salvarLocal()">💾 Salvar no dispositivo</button>
+        <button class="btn-primary" onclick="publicarTotem()">📤 Publicar no Totem</button>
+        <button class="btn-danger" onclick="restaurarPadrao()">🔄 Restaurar Padrão</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="painel.js"></script>
+</body>
+</html>
