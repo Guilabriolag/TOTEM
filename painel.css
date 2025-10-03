@@ -1,0 +1,116 @@
+/* Layout geral */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+}
+
+#app {
+  display: flex;
+  width: 100%;
+}
+
+/* Sidebar */
+#sidebar {
+  background: #2c3e50;
+  color: #fff;
+  min-width: 220px;
+  max-width: 220px;
+  transition: all 0.3s ease;
+  padding: 10px;
+}
+
+#sidebar.collapsed {
+  max-width: 60px;
+  overflow: hidden;
+}
+
+#sidebar h2 {
+  margin: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+#sidebar button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+#menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+#menu li {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#menu li:hover {
+  background: #34495e;
+}
+
+/* Conteúdo */
+main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.tab {
+  display: none;
+}
+
+.tab.active {
+  display: block;
+}
+
+/* Botões */
+.btn-primary {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+/* Formulários */
+.form-group, .form-grid {
+  margin: 10px 0;
+  display: grid;
+  gap: 10px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+input, textarea, select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
