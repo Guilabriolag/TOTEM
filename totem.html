@@ -63,6 +63,30 @@
     <button id="enviarPedido">📤 Enviar Pedido</button>
     <button id="limparCarrinho">🗑️ Limpar</button>
   </div>
+<div id="formularioPedido">
+  <h3>Dados do Pedido</h3>
+  <label>Nome: <input type="text" id="clienteNome"></label>
+  <label>Telefone: <input type="text" id="clienteTelefone"></label>
+  
+  <div id="deliveryCampos" class="hidden">
+    <label>Endereço: <input type="text" id="clienteEndereco"></label>
+    <label>Bairro: <input type="text" id="clienteBairro"></label>
+  </div>
+
+  <label>Cupom: <input type="text" id="pedidoCupom"></label>
+
+  <h4>Pagamento</h4>
+  <select id="formaPagamento">
+    <option value="Pix">Pix</option>
+    <option value="Dinheiro">Dinheiro</option>
+    <option value="Cartão Débito">Cartão Débito</option>
+    <option value="Cartão Crédito">Cartão Crédito</option>
+  </select>
+
+  <div id="trocoCampo" class="hidden">
+    <label>Precisa de troco? <input type="text" id="trocoValor" placeholder="Ex: R$ 50,00"></label>
+  </div>
+</div>
 
   <script src="totem.js"></script>
 </body>
