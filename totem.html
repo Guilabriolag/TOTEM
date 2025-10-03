@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Totem - SeuNegócio</title>
+  <link rel="stylesheet" href="totem.css">
+</head>
+<body>
+  <!-- Barra superior -->
+  <header id="topbar">
+    <img id="lojaLogo" src="" alt="Logo">
+    <h1 id="lojaNome">Carregando...</h1>
+  </header>
+
+  <!-- Banner -->
+  <section id="banner">
+    <a id="bannerLink" href="#" target="_blank">
+      <img id="bannerImg" src="" alt="Banner">
+      <p id="bannerTexto"></p>
+    </a>
+  </section>
+
+  <!-- Carrossel -->
+  <section id="carrossel"></section>
+
+  <!-- Menu lateral -->
+  <aside id="menuLateral" class="hidden">
+    <button id="fecharMenu">✖</button>
+    <nav>
+      <ul>
+        <li data-tab="categorias">Categorias</li>
+        <li data-tab="produtos">Produtos</li>
+        <li data-tab="promocoes">Promoções</li>
+        <li data-tab="fale">Fale com a gente</li>
+      </ul>
+    </nav>
+  </aside>
+  <button id="abrirMenu">☰</button>
+
+  <!-- Conteúdo -->
+  <main>
+    <section id="categorias" class="aba"></section>
+    <section id="produtos" class="aba"></section>
+    <section id="promocoes" class="aba"></section>
+    <section id="fale" class="aba">
+      <a id="whatsappLink" href="#" target="_blank" class="btn-primary">💬 WhatsApp</a>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer id="rodape">
+    <button id="btnDelivery">🚚 Delivery</button>
+    <button id="btnRetirar">🏪 Retirar</button>
+    <button id="btnAtendente">💬 Falar com atendente</button>
+  </footer>
+
+  <!-- Carrinho -->
+  <div id="carrinho" class="hidden">
+    <h2>🛒 Carrinho</h2>
+    <div id="itensCarrinho"></div>
+    <div id="formularioPedido"></div>
+    <button id="enviarPedido">📤 Enviar Pedido</button>
+    <button id="limparCarrinho">🗑️ Limpar</button>
+  </div>
+
+  <script src="totem.js"></script>
+</body>
+</html>
