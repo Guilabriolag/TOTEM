@@ -1,5 +1,5 @@
 // =============================
-// Estado Inicial
+// 1️⃣ Estado Inicial
 // =============================
 let state = {
   loja: {
@@ -31,76 +31,79 @@ let state = {
 };
 
 // =============================
-// Utilitários de Armazenamento
+// 2️⃣ Sistema de Abas e Sidebar
+// =============================
+const tabs = document.querySelectorAll('.tab');
+const menuItems = document.querySelectorAll('#menu li');
+
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.tab;
+    tabs.forEach(tab => tab.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+// Toggle Menu lateral
+const sidebar = document.getElementById('sidebar');
+document.getElementById('toggleMenu').addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+});
+
+// =============================
+// 3️⃣ LocalStorage
 // =============================
 function salvarLocal() {
   localStorage.setItem('painelState', JSON.stringify(state));
-  alert("💾 Salvo no dispositivo!");
+  alert("💾 Configurações salvas localmente!");
 }
-
 function carregarLocal() {
   const saved = localStorage.getItem('painelState');
-  if (saved) {
+  if(saved) {
     state = JSON.parse(saved);
-    renderTudo();
-    alert("✅ Configurações carregadas!");
+    console.log("🔄 Estado carregado:", state);
+    atualizarPreview();
   }
 }
 
 // =============================
-// Publicar no JSONBin
+// 4️⃣ JSONBin Integração
 // =============================
 function publicarTotem() {
   const binId = document.getElementById("jsonbinId").value.trim();
   const masterKey = document.getElementById("masterKey").value.trim();
-
-  if (!binId || !masterKey) {
-    alert("⚠️ Configure o JSONBin ID e a Master Key antes de publicar!");
-    return;
-  }
+  if(!binId || !masterKey) { alert("⚠️ Configure JSONBin ID e Master Key"); return; }
 
   fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Master-Key": masterKey
-    },
+    headers: { "Content-Type": "application/json", "X-Master-Key": masterKey },
     body: JSON.stringify(state)
   })
   .then(res => res.json())
-  .then(() => alert("✅ Publicado com sucesso no Totem!"))
-  .catch(err => {
-    console.error("Erro:", err);
-    alert("❌ Erro ao publicar no JSONBin.");
-  });
+  .then(json => { alert("✅ Publicado com sucesso!"); console.log(json); })
+  .catch(err => alert("❌ Erro ao publicar: " + err));
 }
 
 // =============================
-// Restaurar Padrão
+// 5️⃣ Restaurar Padrão
 // =============================
 function restaurarPadrao() {
-  const senha = prompt("Digite a senha para restaurar (1234):");
-  if (senha !== "1234") {
-    alert("❌ Senha incorreta!");
-    return;
-  }
+  const senha = prompt("Digite a senha para restaurar:");
+  if(senha !== "1234"){ alert("❌ Senha incorreta"); return; }
+
   state = {
-    loja: { nome:"", telefone:"", pix:"", banco:"", endereco:"", logo:"", horarios:"", corPrimaria:"#3498db", corSecundaria:"#95a5a6", fundo:"", botaoCarrinho:"", modoEscuro:false, musicaAmbiente:"" },
-    categorias: [],
-    modosVenda: [],
-    produtos: [],
-    clientes: [],
-    cupons: [],
-    publicidade: { banner:{texto:"",imagem:"",link:""}, carrossel:[], redesSociais:{instagram:"",facebook:"",whatsapp:""} },
-    cobertura: []
+    loja:{nome:"",telefone:"",pix:"",banco:"",endereco:"",logo:"",horarios:"",corPrimaria:"#3498db",corSecundaria:"#95a5a6",fundo:"",botaoCarrinho:"",modoEscuro:false,musicaAmbiente:""},
+    categorias:[], modosVenda:[], produtos:[], clientes:[], cupons:[],
+    publicidade:{banner:{texto:"",imagem:"",link:""},carrossel:[],redesSociais:{instagram:"",facebook:"",whatsapp:""}},
+    cobertura:[]
   };
   salvarLocal();
-  renderTudo();
-  alert("🔄 Restaurado para padrão!");
+  atualizarPreview();
+  alert("🔄 Estado restaurado para o padrão.");
 }
 
 // =============================
-// Dashboard
+// 6️⃣ Dashboard
 // =============================
 function renderDashboard() {
   const ctx = document.getElementById("vendasChart").getContext("2d");
@@ -110,7 +113,12 @@ function renderDashboard() {
       labels: ["Produtos", "Clientes", "Cupons", "Bairros"],
       datasets: [{
         label: "Estatísticas",
-        data: [state.produtos.length, state.clientes.length, state.cupons.length, state.cobertura.length],
+        data: [
+          state.produtos.length,
+          state.clientes.length,
+          state.cupons.length,
+          state.cobertura.length
+        ],
         backgroundColor: ["#3498db","#2ecc71","#e74c3c","#f39c12"]
       }]
     }
@@ -118,34 +126,33 @@ function renderDashboard() {
 }
 
 // =============================
-// Categorias
+// 7️⃣ Categorias CRUD
 // =============================
 function adicionarCategoria() {
   const nome = document.getElementById("novaCategoria").value;
-  if (!nome) return;
+  if(!nome) return;
   state.categorias.push({ nome, subcategorias: [] });
   salvarLocal();
   renderCategorias();
 }
-
 function removerCategoria(i) {
   state.categorias.splice(i,1);
   salvarLocal();
   renderCategorias();
 }
-
 function renderCategorias() {
   const container = document.getElementById("category-tree");
   container.innerHTML = state.categorias.map((c,i)=>`
     <div>
       <b>${c.nome}</b>
       <button onclick="removerCategoria(${i})">❌</button>
+      <ul>${c.subcategorias.map(s=>`<li>${s}</li>`).join("")}</ul>
     </div>
   `).join("");
 }
 
 // =============================
-// Modo de Venda
+// 8️⃣ Modos de Venda CRUD
 // =============================
 function adicionarModoVenda() {
   const tipo = document.getElementById("selectModoVenda").value;
@@ -154,14 +161,12 @@ function adicionarModoVenda() {
   salvarLocal();
   renderModosVenda();
 }
-
 function renderModosVenda() {
-  const div = document.getElementById("modo-venda");
-  div.innerHTML += state.modosVenda.map(m=>`<div>${m.tipo} (${m.exemplo})</div>`).join("");
+  // aqui você pode listar os modos cadastrados
 }
 
 // =============================
-// Produtos
+// 9️⃣ Produtos CRUD
 // =============================
 function adicionarProduto() {
   const produto = {
@@ -180,13 +185,11 @@ function adicionarProduto() {
   salvarLocal();
   renderProdutos();
 }
-
 function removerProduto(i) {
   state.produtos.splice(i,1);
   salvarLocal();
   renderProdutos();
 }
-
 function renderProdutos() {
   const lista = document.getElementById("listaProdutosContainer");
   lista.innerHTML = state.produtos.map((p,i)=>`
@@ -200,7 +203,7 @@ function renderProdutos() {
 }
 
 // =============================
-// Clientes
+// 🔟 Clientes CRUD
 // =============================
 function salvarCliente(cliente) {
   state.clientes.push(cliente);
@@ -208,7 +211,7 @@ function salvarCliente(cliente) {
 }
 
 // =============================
-// Cupons
+// 1️⃣1️⃣ Cupons CRUD
 // =============================
 function criarCupom(cupom) {
   state.cupons.push(cupom);
@@ -216,92 +219,76 @@ function criarCupom(cupom) {
 }
 
 // =============================
-// Publicidade
+// 1️⃣2️⃣ Publicidade
 // =============================
-function salvarPublicidade(pub) {
-  state.publicidade = pub;
+function salvarPublicidade(banner,carrossel,redes) {
+  state.publicidade.banner = banner;
+  state.publicidade.carrossel = carrossel;
+  state.publicidade.redesSociais = redes;
   salvarLocal();
 }
 
 // =============================
-// Dados da Loja
+// 1️⃣3️⃣ Dados da Loja
 // =============================
 function salvarDadosLoja(dados) {
-  state.loja = { ...state.loja, ...dados };
+  state.loja = {...state.loja, ...dados};
   salvarLocal();
 }
 
 // =============================
-// Cobertura
+// 1️⃣4️⃣ Cobertura
 // =============================
-function adicionarCobertura(bairro, taxa, tempo) {
+function adicionarCobertura(bairro,taxa,tempo) {
   state.cobertura.push({ bairro, taxa, tempo });
   salvarLocal();
 }
 
 // =============================
-// Customizar
+// 1️⃣5️⃣ Customização
 // =============================
-function salvarCustomizacao(config) {
-  state.loja = { ...state.loja, ...config };
+function salvarCustomizacao(custom) {
+  state.loja = {...state.loja, ...custom};
   salvarLocal();
 }
 
 // =============================
-// Preview
+// 1️⃣6️⃣ Preview em tempo real
 // =============================
-function atualizarPreview() {
+function atualizarPreview(){
   const iframe = document.getElementById("previewIframe");
   iframe.srcdoc = gerarTotemHTML();
 }
-
-function gerarTotemHTML() {
+function gerarTotemHTML(){
   return `
-    <html>
-      <head><title>${state.loja.nome}</title></head>
-      <body style="font-family:Arial,sans-serif;">
-        <header style="background:${state.loja.corPrimaria};color:#fff;padding:10px;text-align:center;">
-          <img src="${state.loja.logo}" style="height:40px;">
-          <h1>${state.loja.nome}</h1>
-        </header>
-        <main>
-          <h2>Produtos:</h2>
-          <ul>
-            ${state.produtos.map(p=>`<li>${p.nome} - R$ ${p.preco}</li>`).join('')}
-          </ul>
-        </main>
-      </body>
-    </html>
+  <html>
+    <head>
+      <style>
+        body { font-family: Arial; background:${state.loja.fundo || "#fff"}; }
+        header { background:${state.loja.corPrimaria};color:#fff;padding:10px;text-align:center; }
+        .produto { border:1px solid #ccc; margin:5px; padding:5px; }
+      </style>
+    </head>
+    <body>
+      <header>
+        <img src="${state.loja.logo}" style="height:40px;">
+        <h1>${state.loja.nome}</h1>
+      </header>
+      <main>
+        <h2>Produtos:</h2>
+        ${state.produtos.map(p=>`<div class="produto">${p.nome} - R$ ${p.preco.toFixed(2)}</div>`).join("")}
+      </main>
+    </body>
+  </html>
   `;
 }
 
 // =============================
-// Navegação entre Abas
-// =============================
-const tabs = document.querySelectorAll('.tab');
-const menuItems = document.querySelectorAll('#menu li');
-
-menuItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const target = item.dataset.tab;
-    tabs.forEach(tab => tab.classList.remove('active'));
-    document.getElementById(target).classList.add('active');
-    if (target === "dashboard") renderDashboard();
-    if (target === "preview") atualizarPreview();
-  });
-});
-
-// =============================
-// Inicialização
+// 1️⃣7️⃣ Inicialização
 // =============================
 window.onload = () => {
   carregarLocal();
-  renderTudo();
-};
-
-// Renderizar tudo ao carregar
-function renderTudo() {
+  renderDashboard();
   renderCategorias();
   renderProdutos();
-  renderDashboard();
-}
+};
